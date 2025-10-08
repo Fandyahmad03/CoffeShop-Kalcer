@@ -1,0 +1,39 @@
+# Nama workflow
+name: Deploy Flutter Web
+
+# Kapan workflow ini dijalankan
+on:
+  push:
+    branches:
+      - main # Jalankan hanya jika ada push ke branch 'main'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Menggunakan server Ubuntu terbaru
+
+    steps:
+      # Langkah 1: Mengambil kode dari repository Anda
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Langkah 2: Meng-install Flutter SDK
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable' # Menggunakan channel stable
+
+      # Langkah 3: Meng-install dependencies proyek
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Langkah 4: Build aplikasi web dengan base-href yang benar
+      # PENTING: Ganti 'CoffeShop-Kalcer' dengan nama repository Anda
+      - name: Build Flutter Web
+        run: flutter build web --release --base-href "/CoffeShop-Kalcer/"
+
+      # Langkah 5: Deploy ke branch gh-pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
