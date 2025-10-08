@@ -19,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _checkFields() {
     setState(() {
+      // Pengecekan hanya untuk email dan password
       _isFilled =
           emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
     });
@@ -42,17 +43,22 @@ class _LoginPageState extends State<LoginPage> {
     if (_formKey.currentState!.validate()) {
       final email = emailController.text;
       final password = passwordController.text;
+
+      // Tetap gunakan validasi login Anda
       if (UserData.login(email, password)) {
-        final name = UserData.getNameByEmail(
-          email,
-        ); // Retrieve name based on email
+        
+        // ================== INI PERUBAHAN UTAMANYA ==================
+        // Ambil nama dari bagian sebelum tanda '@' pada email
+        final name = email.split('@').first;
+        // ==========================================================
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => HomePage(
               email: email,
-              name: name,
-            ), // Pass email and name to HomePage
+              name: name, // Kirim nama yang sudah diambil dari email
+            ),
           ),
         );
       } else {
@@ -74,7 +80,6 @@ class _LoginPageState extends State<LoginPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Logo bulat dengan shadow
               Container(
                 margin: const EdgeInsets.only(top: 40, bottom: 24),
                 decoration: BoxDecoration(
@@ -87,13 +92,12 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                child: CircleAvatar(
+                child: const CircleAvatar(
                   radius: 48,
                   backgroundColor: Colors.white,
                   backgroundImage: AssetImage("assets/logo.jpeg"),
                 ),
               ),
-              // Card login
               Card(
                 elevation: 8,
                 shape: RoundedRectangleBorder(
@@ -109,15 +113,18 @@ class _LoginPageState extends State<LoginPage> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        Text(
-                          "Coffeshop Kalcer ",
+                        const Text(
+                          "Coffeshop Kalcer",
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF6F4E37),
+                            color: Color(0xFF6F4E37),
                           ),
                         ),
                         const SizedBox(height: 32),
+                        
+                        // Kolom input NAMA sudah DIHAPUS
+                        
                         TextFormField(
                           controller: emailController,
                           decoration: InputDecoration(
@@ -198,10 +205,10 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 );
                               },
-                              child: Text(
+                              child: const Text(
                                 "Daftar di sini",
                                 style: TextStyle(
-                                  color: const Color(0xFF6F4E37),
+                                  color: Color(0xFF6F4E37),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

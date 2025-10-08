@@ -51,6 +51,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  loading_animation_widget: ^1.2.1
+  flutter_rating_stars: ^1.1.0 
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -62,6 +64,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/
+  
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -93,23 +98,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-  assets:
-    - assets/logo.jpeg
-    - assets/cangkir_kopi.jpeg
-    - assets/macchiato.jpg
-    - assets/americano.jpg
-    - assets/cappuccino.jpg
-    - assets/espresso.jpg
-    - assets/Latte.jpg
-    - assets/mocca.jpg
-    - assets/flat_white.jpg
-    - assets/iced_americano.jpg
-    - assets/iced_latte.jpg
-    - assets/iced_mocha.jpg
-    - assets/iced_macchiato.jpg
-    - assets/cold_brew.jpg
-    - assets/greentea_latte.jpg
-    - assets/matcha_frappe.jpg
+  
+
+
+
+    
+
 
 
 

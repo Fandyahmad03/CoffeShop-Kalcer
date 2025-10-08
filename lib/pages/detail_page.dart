@@ -1,45 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import '../model/user_model.dart';
 
 class DetailPage extends StatefulWidget {
   final MenuModel menuItem;
+  final UserModel user; // <-- DITAMBAHKAN: Untuk mengakses fungsi update
 
-  const DetailPage({super.key, required this.menuItem});
+  const DetailPage({
+    super.key,
+    required this.menuItem,
+    required this.user, // <-- DITAMBAHKAN
+  });
 
   @override
   State<DetailPage> createState() => _DetailPageState();
 }
 
-class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+class _DetailPageState extends State<DetailPage> {
   int _quantity = 1;
-  double _rating = 4.5;
+  String _selectedSize = "Medium";
+  double _ratingValue = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
-    );
-
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
+    _ratingValue = widget.menuItem.rating;
   }
 
   void _incrementQuantity() {
@@ -57,350 +42,293 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF6F4E37), Color(0xFFF3E9E2)],
+      backgroundColor: const Color(0xFF6F4E37),
+      body: Stack(
+        children: [
+          _buildProductImage(),
+          _buildContentSheet(),
+          _buildTopButtons(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductImage() {
+    return Hero(
+      tag: 'menu_image_${widget.menuItem.name}',
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.5,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(widget.menuItem.imageUrl),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.2),
+              BlendMode.darken,
+            ),
           ),
         ),
-        child: SafeArea(
-          child: Column(
+      ),
+    );
+  }
+
+  Widget _buildContentSheet() {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.6,
+      maxChildSize: 0.8,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFF5F0E8),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(24.0),
             children: [
-              // Custom App Bar
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(
-                        Icons.arrow_back_ios,
-                        color: Colors.white,
-                      ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white.withOpacity(0.2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                    const Expanded(
-                      child: Text(
-                        "Detail Menu",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 48), // Balance the back button
-                  ],
-                ),
-              ),
-
-              // Main Content
-              Expanded(
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Hero Image
-                          Hero(
-                            tag: 'menu_image_${widget.menuItem.name}',
-                            child: Container(
-                              margin: const EdgeInsets.all(16),
-                              height: 280,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(24),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 10),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
-                                child: Image.asset(
-                                  widget.menuItem.imageUrl,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // Content Card
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16),
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Title and Rating Row
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        widget.menuItem.name,
-                                        style: const TextStyle(
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF2D2D2D),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(
-                                          0xFF6F4E37,
-                                        ).withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.star,
-                                            color: Color(0xFF6F4E37),
-                                            size: 18,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            _rating.toString(),
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xFF6F4E37),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 12),
-
-                                // Category Badge
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFF6F4E37,
-                                    ).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    widget.menuItem.category,
-                                    style: const TextStyle(
-                                      color: Color(0xFF6F4E37),
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 16),
-
-                                // Description
-                                Text(
-                                  widget.menuItem.description,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                    height: 1.6,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 24),
-
-                                // Price and Quantity Row
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // Price
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          "Harga",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.black54,
-                                          ),
-                                        ),
-                                        Text(
-                                          widget.menuItem.price,
-                                          style: const TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF6F4E37),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    // Quantity Selector
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade100,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          IconButton(
-                                            onPressed: _decrementQuantity,
-                                            icon: const Icon(Icons.remove),
-                                            color: const Color(0xFF6F4E37),
-                                            iconSize: 20,
-                                          ),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                            ),
-                                            child: Text(
-                                              _quantity.toString(),
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xFF6F4E37),
-                                              ),
-                                            ),
-                                          ),
-                                          IconButton(
-                                            onPressed: _incrementQuantity,
-                                            icon: const Icon(Icons.add),
-                                            color: const Color(0xFF6F4E37),
-                                            iconSize: 20,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 32),
-
-                                // Order Button
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 56,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            "Menambahkan ${_quantity}x ${widget.menuItem.name} ke keranjang",
-                                          ),
-                                          backgroundColor: const Color(
-                                            0xFF6F4E37,
-                                          ),
-                                          duration: const Duration(seconds: 2),
-                                        ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF6F4E37),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      elevation: 2,
-                                    ),
-                                    child: const Text(
-                                      "Tambah ke Keranjang",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 16),
-
-                                // Additional Info
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFF6F4E37,
-                                    ).withOpacity(0.05),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        "Informasi Tambahan",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF6F4E37),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        "• Produk ini dibuat fresh setiap hari\n• Waktu persiapan: 5-10 menit\n• Tersedia untuk take away atau dine in",
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black54,
-                                          height: 1.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 24),
-                        ],
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.menuItem.name,
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4E342E),
                       ),
                     ),
                   ),
+                  Text(
+                    widget.menuItem.price,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4E342E),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              _buildRatingStars(),
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              const Text(
+                "Ukuran Cup",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF4E342E),
                 ),
               ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildSizeChip("Small"),
+                  _buildSizeChip("Medium"),
+                  _buildSizeChip("Large"),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                "Deskripsi",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF4E342E),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.menuItem.description,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.brown.shade700,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Jumlah",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4E342E),
+                    ),
+                  ),
+                  _buildQuantitySelector(),
+                ],
+              ),
+              const SizedBox(height: 32),
+              _buildAddToCartButton(),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRatingStars() {
+    return Row(
+      children: [
+        RatingStars(
+          value: _ratingValue,
+          onValueChanged: (v) {
+            setState(() {
+              _ratingValue = v;
+              // Langsung update data di model utama
+              widget.user.updateMenuRating(widget.menuItem.name, v);
+            });
+          },
+          starBuilder: (index, color) => Icon(Icons.star, color: color),
+          starCount: 5,
+          starSize: 25,
+          starColor: Colors.amber,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          "(${_ratingValue.toStringAsFixed(1)})",
+          style: const TextStyle(
+            color: Color(0xFF4E342E),
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildSizeChip(String size) {
+    bool isSelected = _selectedSize == size;
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: ChoiceChip(
+          label: SizedBox(
+            width: double.infinity,
+            child: Text(
+              size,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.brown.shade800,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          selected: isSelected,
+          onSelected: (selected) {
+            setState(() {
+              _selectedSize = size;
+            });
+          },
+          selectedColor: const Color(0xFF4E342E),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: isSelected ? const Color(0xFF4E342E) : Colors.grey.shade300,
+            ),
+          ),
+          showCheckmark: false,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuantitySelector() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: _decrementQuantity,
+            icon: const Icon(Icons.remove, color: Color(0xFF4E342E)),
+          ),
+          Text(
+            _quantity.toString(),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF4E342E),
+            ),
+          ),
+          IconButton(
+            onPressed: _incrementQuantity,
+            icon: const Icon(Icons.add, color: Color(0xFF4E342E)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddToCartButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  "$_quantity x ${widget.menuItem.name} ($_selectedSize) ditambahkan"),
+              backgroundColor: const Color(0xFF4E342E),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF4E342E),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: const Text(
+          "Tambah ke Keranjang",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopButtons() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            CircleAvatar(
+              backgroundColor: Colors.black.withOpacity(0.3),
+              child: IconButton(
+                // DIUBAH: Saat kembali, kirim data rating terbaru
+                onPressed: () => Navigator.pop(context, true),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+              ),
+            ),
+            CircleAvatar(
+              backgroundColor: Colors.black.withOpacity(0.3),
+              child: IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.favorite_border, color: Colors.white),
+              ),
+            ),
+          ],
         ),
       ),
     );

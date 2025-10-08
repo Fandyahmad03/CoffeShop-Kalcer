@@ -2,23 +2,27 @@ import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
   final String email;
-  final String name; // Added name parameter
+  final String name;
 
   const ProfilePage({super.key, required this.email, required this.name});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100], // Background lebih cerah
       appBar: AppBar(
-        title: Text("Profile of $name"),
-        backgroundColor: const Color(0xFF4E342E),
+        title: Text("Profil Saya"),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        scrolledUnderElevation: 1,
       ),
       body: ListView(
         children: [
           // Header Profile
           Container(
             color: const Color(0xFF6F4E37),
-            padding: const EdgeInsets.symmetric(vertical: 20),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 30),
             child: Column(
               children: [
                 const CircleAvatar(
@@ -26,31 +30,28 @@ class ProfilePage extends StatelessWidget {
                   backgroundColor: Colors.white,
                   child: Icon(Icons.person, size: 50, color: Color(0xFF6F4E37)),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
+                // MENAMPILKAN NAMA (TULISAN BESAR)
                 Text(
-                  email,
+                  name,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 22,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
-                  name, // Display the user's name
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const SizedBox(height: 4),
               ],
             ),
           ),
+          
+          const SizedBox(height: 10), // Memberi sedikit jarak
+
           // Menu Items
           ListTile(
             leading: const Icon(Icons.notifications, color: Color(0xFF6F4E37)),
             title: const Text("Notifikasi"),
-            trailing: const Icon(Icons.arrow_forward_ios),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               // Handle notifikasi
             },
@@ -59,7 +60,7 @@ class ProfilePage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.history, color: Color(0xFF6F4E37)),
             title: const Text("Riwayat Pesanan"),
-            trailing: const Icon(Icons.arrow_forward_ios),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               // Handle riwayat pesanan
             },
@@ -68,7 +69,7 @@ class ProfilePage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.contact_phone, color: Color(0xFF6F4E37)),
             title: const Text("Hubungi Kami"),
-            trailing: const Icon(Icons.arrow_forward_ios),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               showDialog(
                 context: context,
@@ -78,7 +79,7 @@ class ProfilePage extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
-                      Text("Email: warkopkalcer@gmail.com"),
+                      Text("Email: CoffeShop kalcer@gmail.com"),
                       SizedBox(height: 8),
                       Text("Telepon: +62 812-3456-7890"),
                     ],
@@ -97,19 +98,19 @@ class ProfilePage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.settings, color: Color(0xFF6F4E37)),
             title: const Text("Pengaturan"),
-            trailing: const Icon(Icons.arrow_forward_ios),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
               // Handle pengaturan
             },
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.logout, color: Color(0xFF6F4E37)),
-            title: const Text("Keluar"),
-            trailing: const Icon(Icons.arrow_forward_ios),
+            leading: const Icon(Icons.logout, color: Colors.red), // Ikon logout diberi warna merah
+            title: const Text("Keluar", style: TextStyle(color: Colors.red)),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.red),
             onTap: () {
-              // Handle logout
-              Navigator.pushReplacementNamed(context, '/login');
+              
+              Navigator.of(context).popUntil((route) => route.isFirst);
             },
           ),
         ],

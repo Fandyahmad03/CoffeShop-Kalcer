@@ -7,18 +7,22 @@ class BaseModel {
 class MenuModel {
   final String name;
   final String price;
-  final String? icon; // Make 'icon' optional
-  final String imageUrl; // New property for menu image
-  final String description; // New property for menu description
-  final String category; // New property for menu category
+  final String? icon;
+  final String imageUrl;
+  final String description;
+  final String category;
+  final String subtitle;
+  double rating; // <-- DIUBAH: 'final' dihapus agar bisa diupdate
 
   MenuModel({
     required this.name,
     required this.price,
-    this.icon, // Optional parameter
+    this.icon,
     required this.imageUrl,
     required this.description,
-    required this.category, // Initialize category
+    required this.category,
+    required this.subtitle,
+    this.rating = 0.0,
   });
 }
 
@@ -26,28 +30,35 @@ class UserModel extends BaseModel {
   String _name;
   int _age;
 
-  UserModel(String name, int age) : _name = name, _age = age {
+  UserModel(String name, int age)
+      : _name = name,
+        _age = age {
     initializeMenuItems();
   }
- 
 
-  // Getter for age
   int get age => _age;
-
   List<MenuModel> _menuItems = [];
-
-  // Getter for menu items
   List<MenuModel> get menuItems => _menuItems;
 
-  // Method to add a menu item
   void addMenuItem(MenuModel menuItem) {
     _menuItems.add(menuItem);
   }
 
-  // Method to remove a menu item
   void removeMenuItem(MenuModel menuItem) {
     _menuItems.remove(menuItem);
   }
+  
+  // v-- FUNGSI BARU INI DITAMBAHKAN --v
+  // Untuk mengupdate rating item tertentu
+  void updateMenuRating(String menuName, double newRating) {
+    try {
+      final item = _menuItems.firstWhere((menu) => menu.name == menuName);
+      item.rating = newRating;
+    } catch (e) {
+      print("Menu item not found: $menuName");
+    }
+  }
+  // ^-- SAMPAI SINI --^
 
   void initializeMenuItems() {
     // Coffee
@@ -59,6 +70,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/espresso.jpg",
         description: "Kopi pekat dengan rasa yang kuat.",
         category: "Coffee",
+        subtitle: "Strong & Bold",
+        rating: 4.8,
       ),
     );
     addMenuItem(
@@ -69,6 +82,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/americano.jpg",
         description: "Kopi hitam dengan rasa yang kuat.",
         category: "Coffee",
+        subtitle: "Pure Black Coffee",
+        rating: 4.5,
       ),
     );
     addMenuItem(
@@ -79,8 +94,11 @@ class UserModel extends BaseModel {
         imageUrl: "assets/cappuccino.jpg",
         description: "Kopi dengan susu dan foam yang lembut.",
         category: "Coffee",
+        subtitle: "With Oat Milk",
+        rating: 4.7,
       ),
     );
+    // ... (sisa menu Anda tetap sama)
     addMenuItem(
       MenuModel(
         name: "Caffè Latte",
@@ -89,6 +107,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/latte.jpg",
         description: "Kopi dengan susu yang lembut.",
         category: "Coffee",
+        subtitle: "Smooth and Creamy",
+        rating: 4.6,
       ),
     );
     addMenuItem(
@@ -99,6 +119,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/mocca.jpg",
         description: "Kopi dengan campuran coklat.",
         category: "Coffee",
+        subtitle: "Rich Chocolate Blend",
+        rating: 4.8,
       ),
     );
     addMenuItem(
@@ -109,6 +131,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/macchiato.jpg",
         description: "Kopi dengan rasa karamel yang lembut.",
         category: "Coffee",
+        subtitle: "Sweet Caramel Drizzle",
+        rating: 4.9,
       ),
     );
     addMenuItem(
@@ -119,10 +143,10 @@ class UserModel extends BaseModel {
         imageUrl: "assets/flat_white.jpg",
         description: "Kopi dengan susu yang lembut dan creamy.",
         category: "Coffee",
+        subtitle: "Velvety Microfoam",
+        rating: 4.7,
       ),
     );
-
-    // Cold Coffee
     addMenuItem(
       MenuModel(
         name: "Iced Americano",
@@ -131,6 +155,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/iced_americano.jpg",
         description: "Americano dingin yang menyegarkan.",
         category: "Cold Coffee",
+        subtitle: "Chilled & Refreshing",
+        rating: 4.5,
       ),
     );
     addMenuItem(
@@ -141,6 +167,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/iced_latte.jpg",
         description: "Latte dingin yang menyegarkan.",
         category: "Cold Coffee",
+        subtitle: "Cool and Creamy",
+        rating: 4.6,
       ),
     );
     addMenuItem(
@@ -151,6 +179,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/iced_mocha.jpg",
         description: "Mocha dingin yang menyegarkan.",
         category: "Cold Coffee",
+        subtitle: "Icy Chocolate Kick",
+        rating: 4.7,
       ),
     );
     addMenuItem(
@@ -161,6 +191,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/iced_macchiato.jpg",
         description: "Caramel Macchiato dingin yang menyegarkan.",
         category: "Cold Coffee",
+        subtitle: "Cold & Sweet",
+        rating: 4.8,
       ),
     );
     addMenuItem(
@@ -171,10 +203,10 @@ class UserModel extends BaseModel {
         imageUrl: "assets/cold_brew.jpg",
         description: "Kopi dingin dengan rasa yang kuat.",
         category: "Cold Coffee",
+        subtitle: "Smooth, Low Acidity",
+        rating: 4.9,
       ),
     );
-
-    // Non-Coffee
     addMenuItem(
       MenuModel(
         name: "Green Tea Latte",
@@ -183,6 +215,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/greentea_latte.jpg",
         description: "Latte dengan rasa green tea.",
         category: "Non-Coffee",
+        subtitle: "Earthy Matcha Flavor",
+        rating: 4.6,
       ),
     );
     addMenuItem(
@@ -193,6 +227,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/matcha_frappe.jpg",
         description: "Frappé dengan rasa matcha.",
         category: "Non-Coffee",
+        subtitle: "Blended Icy Matcha",
+        rating: 4.7,
       ),
     );
     addMenuItem(
@@ -200,9 +236,11 @@ class UserModel extends BaseModel {
         name: "Red Velvet Latte",
         price: "Rp 25.000",
         icon: "🍵",
-        imageUrl: "assets/red_velvet_latte.jpg",
+        imageUrl: "assets/red_velvet.jpg",
         description: "Latte dengan rasa red velvet.",
         category: "Non-Coffee",
+        subtitle: "Sweet Cake Flavor",
+        rating: 4.8,
       ),
     );
     addMenuItem(
@@ -213,6 +251,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/taro_latte.jpg",
         description: "Latte dengan rasa taro.",
         category: "Non-Coffee",
+        subtitle: "Creamy & Nutty",
+        rating: 4.6,
       ),
     );
     addMenuItem(
@@ -223,10 +263,10 @@ class UserModel extends BaseModel {
         imageUrl: "assets/hot_chocolate.jpg",
         description: "Minuman coklat hangat yang lezat.",
         category: "Non-Coffee",
+        subtitle: "Rich & Warming",
+        rating: 4.9,
       ),
     );
-
-    // Pastries & Snacks
     addMenuItem(
       MenuModel(
         name: "Croissant Butter",
@@ -235,6 +275,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/croissant_butter.jpg",
         description: "Pastry renyah dengan rasa butter.",
         category: "Snacks",
+        subtitle: "Flaky & Buttery",
+        rating: 4.7,
       ),
     );
     addMenuItem(
@@ -245,6 +287,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/chocolate_croissant.jpg",
         description: "Croissant dengan isian coklat.",
         category: "Snacks",
+        subtitle: "With Gooey Chocolate",
+        rating: 4.8,
       ),
     );
     addMenuItem(
@@ -255,6 +299,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/cinnamon_roll.jpg",
         description: "Roti gulung dengan rasa kayu manis.",
         category: "Snacks",
+        subtitle: "Warm & Spiced",
+        rating: 4.9,
       ),
     );
     addMenuItem(
@@ -265,6 +311,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/muffin.jpg",
         description: "Kue lembut dengan rasa blueberry atau coklat.",
         category: "Snacks",
+        subtitle: "Moist & Fluffy",
+        rating: 4.6,
       ),
     );
     addMenuItem(
@@ -275,6 +323,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/donut.jpg",
         description: "Donat klasik atau dengan glaze.",
         category: "Snacks",
+        subtitle: "Soft & Sweet",
+        rating: 4.5,
       ),
     );
     addMenuItem(
@@ -285,6 +335,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/french_fries.jpg",
         description: "Kentang goreng renyah.",
         category: "Snacks",
+        subtitle: "Crispy & Salty",
+        rating: 4.4,
       ),
     );
     addMenuItem(
@@ -295,10 +347,10 @@ class UserModel extends BaseModel {
         imageUrl: "assets/chicken_wings.jpg",
         description: "Sayap ayam goreng dengan bumbu spesial.",
         category: "Snacks",
+        subtitle: "Spicy & Savory",
+        rating: 4.8,
       ),
     );
-
-    // Dessert
     addMenuItem(
       MenuModel(
         name: "Cheesecake",
@@ -307,6 +359,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/cheesecake.jpg",
         description: "Kue keju yang lembut dan lezat.",
         category: "Dessert",
+        subtitle: "Creamy & Rich",
+        rating: 4.9,
       ),
     );
     addMenuItem(
@@ -317,6 +371,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/chocolate_croissant.jpg",
         description: "Croissant dengan isian coklat.",
         category: "Dessert",
+        subtitle: "A Perfect Sweet Treat",
+        rating: 4.8,
       ),
     );
     addMenuItem(
@@ -327,6 +383,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/tiramisu.jpg",
         description: "Kue kopi dengan lapisan mascarpone.",
         category: "Dessert",
+        subtitle: "Classic Italian Dessert",
+        rating: 4.9,
       ),
     );
     addMenuItem(
@@ -334,9 +392,11 @@ class UserModel extends BaseModel {
         name: "Brownies with Ice Cream",
         price: "Rp 25.000",
         icon: "🍫",
-        imageUrl: "assets/brownies_with_ice_cream.jpg",
+        imageUrl: "assets/brownies.jpg",
         description: "Brownies dengan tambahan es krim.",
         category: "Dessert",
+        subtitle: "Warm & Fudgy",
+        rating: 5.0,
       ),
     );
     addMenuItem(
@@ -347,10 +407,10 @@ class UserModel extends BaseModel {
         imageUrl: "assets/panna_cotta.jpg",
         description: "Dessert Italia yang lembut dan manis.",
         category: "Dessert",
+        subtitle: "Silky & Smooth",
+        rating: 4.8,
       ),
     );
-
-    // Light Meals
     addMenuItem(
       MenuModel(
         name: "Club Sandwich",
@@ -359,6 +419,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/club_sandwich.jpg",
         description: "Sandwich dengan isian daging dan sayuran.",
         category: "Light Meals",
+        subtitle: "Hearty & Filling",
+        rating: 4.7,
       ),
     );
     addMenuItem(
@@ -369,6 +431,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/chicken_burger.jpg",
         description: "Burger dengan isian ayam goreng.",
         category: "Light Meals",
+        subtitle: "Juicy Chicken Patty",
+        rating: 4.6,
       ),
     );
     addMenuItem(
@@ -379,6 +443,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/beef_burger.jpg",
         description: "Burger dengan isian daging sapi.",
         category: "Light Meals",
+        subtitle: "Classic Beef Patty",
+        rating: 4.8,
       ),
     );
     addMenuItem(
@@ -386,9 +452,11 @@ class UserModel extends BaseModel {
         name: "Pasta Aglio Olio",
         price: "Rp 32.000",
         icon: "🍝",
-        imageUrl: "assets/pasta_aglio_olio.jpg",
-        description: "Pasta dengan rasa bawang putih dan minyak zaitun.",
+        imageUrl: "assets/pasta.jpg",
+        description: "Pasta dengan toping udang yang lezat.",
         category: "Light Meals",
+        subtitle: "Garlic & Olive Oil",
+        rating: 4.7,
       ),
     );
     addMenuItem(
@@ -399,10 +467,10 @@ class UserModel extends BaseModel {
         imageUrl: "assets/grilled_chicken.jpg",
         description: "Ayam panggang dengan bumbu spesial.",
         category: "Light Meals",
+        subtitle: "Healthy & Flavorful",
+        rating: 4.9,
       ),
     );
-
-    // Refreshments
     addMenuItem(
       MenuModel(
         name: "Lemon Tea (Hot/Iced)",
@@ -411,6 +479,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/lemon_tea.jpg",
         description: "Teh dengan rasa lemon yang menyegarkan.",
         category: "Refreshments",
+        subtitle: "Zesty & Refreshing",
+        rating: 4.5,
       ),
     );
     addMenuItem(
@@ -421,6 +491,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/lychee_tea.jpg",
         description: "Teh dengan rasa leci yang manis.",
         category: "Refreshments",
+        subtitle: "Sweet & Fragrant",
+        rating: 4.6,
       ),
     );
     addMenuItem(
@@ -431,6 +503,8 @@ class UserModel extends BaseModel {
         imageUrl: "assets/peach_tea.jpg",
         description: "Teh dengan rasa peach yang segar.",
         category: "Refreshments",
+        subtitle: "Fruity & Aromatic",
+        rating: 4.6,
       ),
     );
     addMenuItem(
@@ -438,9 +512,11 @@ class UserModel extends BaseModel {
         name: "Mineral Water",
         price: "Rp 10.000",
         icon: "💧",
-        imageUrl: "assets/mineral_water.jpg",
+        imageUrl: "assets/mineral.jpg",
         description: "Air mineral yang menyegarkan.",
         category: "Refreshments",
+        subtitle: "Pure & Simple",
+        rating: 4.0,
       ),
     );
     addMenuItem(
@@ -448,9 +524,11 @@ class UserModel extends BaseModel {
         name: "Sparkling Water",
         price: "Rp 15.000",
         icon: "✨",
-        imageUrl: "assets/sparkling_water.jpg",
+        imageUrl: "assets/sparkling.jpg",
         description: "Air mineral dengan soda.",
         category: "Refreshments",
+        subtitle: "Bubbly & Crisp",
+        rating: 4.2,
       ),
     );
   }

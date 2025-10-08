@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart'; 
 import 'login_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -50,7 +51,7 @@ class _SplashPageState extends State<SplashPage>
           children: [
             ScaleTransition(
               scale: _logoAnimation,
-              child: CircleAvatar(
+              child: const CircleAvatar(
                 radius: 60,
                 backgroundColor: Colors.white,
                 backgroundImage: AssetImage("assets/logo.jpeg"),
@@ -71,11 +72,14 @@ class _SplashPageState extends State<SplashPage>
               " -Fandy Ahmad- ",
               style: TextStyle(color: Colors.white70, fontSize: 20),
             ),
-            const SizedBox(height: 24),
-            const CircularProgressIndicator(
+            const SizedBox(height: 40), // Jarak ke loading ditambah
+
+            // ===== CircularProgressIndicator DIGANTI DENGAN INI =====
+            LoadingAnimationWidget.staggeredDotsWave(
               color: Colors.white,
-              strokeWidth: 3,
+              size: 50,
             ),
+            // =======================================================
           ],
         ),
       ),
