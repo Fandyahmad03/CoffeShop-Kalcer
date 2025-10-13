@@ -6,7 +6,7 @@ class BaseModel {
 
 class MenuModel {
   final String name;
-  final String price;
+  final Map<String, String> prices; // Harga per ukuran: {'Small': 'Rp 12.000', 'Medium': 'Rp 15.000', 'Large': 'Rp 18.000'}
   final String? icon;
   final String imageUrl;
   final String description;
@@ -16,7 +16,7 @@ class MenuModel {
 
   MenuModel({
     required this.name,
-    required this.price,
+    required this.prices,
     this.icon,
     required this.imageUrl,
     required this.description,
@@ -24,6 +24,28 @@ class MenuModel {
     required this.subtitle,
     this.rating = 0.0,
   });
+
+  // Getter untuk harga default (Medium)
+  String get price => prices['Medium'] ?? 'Rp 0';
+}
+
+class CartItem {
+  final MenuModel menuItem;
+  final String size;
+  int quantity;
+
+  CartItem({
+    required this.menuItem,
+    required this.size,
+    this.quantity = 1,
+  });
+
+  double get totalPrice {
+    // Simple price calculation, assuming price is in format "Rp X.XXX"
+    final priceString = menuItem.prices[size]?.replaceAll('Rp ', '').replaceAll('.', '') ?? '0';
+    final price = double.tryParse(priceString) ?? 0.0;
+    return price * quantity;
+  }
 }
 
 class UserModel extends BaseModel {
@@ -39,6 +61,13 @@ class UserModel extends BaseModel {
   int get age => _age;
   List<MenuModel> _menuItems = [];
   List<MenuModel> get menuItems => _menuItems;
+
+  // New fields for favorites and cart
+  List<MenuModel> _favorites = [];
+  List<MenuModel> get favorites => _favorites;
+
+  List<CartItem> _cart = [];
+  List<CartItem> get cart => _cart;
 
   void addMenuItem(MenuModel menuItem) {
     _menuItems.add(menuItem);
@@ -60,12 +89,57 @@ class UserModel extends BaseModel {
   }
   // ^-- SAMPAI SINI --^
 
+  // Methods for favorites
+  void addToFavorites(MenuModel item) {
+    if (!_favorites.contains(item)) {
+      _favorites.add(item);
+    }
+  }
+
+  void removeFromFavorites(MenuModel item) {
+    _favorites.remove(item);
+  }
+
+  bool isFavorite(MenuModel item) {
+    return _favorites.contains(item);
+  }
+
+  // Methods for cart
+  void addToCart(MenuModel item, String size, int quantity) {
+    final existingItem = _cart.firstWhere(
+      (cartItem) => cartItem.menuItem == item && cartItem.size == size,
+      orElse: () => CartItem(menuItem: item, size: size, quantity: 0),
+    );
+
+    if (existingItem.quantity == 0) {
+      _cart.add(CartItem(menuItem: item, size: size, quantity: quantity));
+    } else {
+      existingItem.quantity += quantity;
+    }
+  }
+
+  void removeFromCart(CartItem item) {
+    _cart.remove(item);
+  }
+
+  void updateCartItemQuantity(CartItem item, int newQuantity) {
+    if (newQuantity <= 0) {
+      removeFromCart(item);
+    } else {
+      item.quantity = newQuantity;
+    }
+  }
+
+  double get cartTotal {
+    return _cart.fold(0.0, (sum, item) => sum + item.totalPrice);
+  }
+
   void initializeMenuItems() {
     // Coffee
     addMenuItem(
       MenuModel(
         name: "Espresso",
-        price: "Rp 15.000",
+        prices: {'Small': 'Rp 12.000', 'Medium': 'Rp 15.000', 'Large': 'Rp 18.000'},
         icon: "☕",
         imageUrl: "assets/espresso.jpg",
         description: "Kopi pekat dengan rasa yang kuat.",
@@ -77,7 +151,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Americano",
-        price: "Rp 18.000",
+        prices: {'Small': 'Rp 15.000', 'Medium': 'Rp 18.000', 'Large': 'Rp 21.000'},
         icon: "☕",
         imageUrl: "assets/americano.jpg",
         description: "Kopi hitam dengan rasa yang kuat.",
@@ -89,7 +163,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Cappuccino",
-        price: "Rp 22.000",
+        prices: {'Small': 'Rp 19.000', 'Medium': 'Rp 22.000', 'Large': 'Rp 25.000'},
         icon: "☕",
         imageUrl: "assets/cappuccino.jpg",
         description: "Kopi dengan susu dan foam yang lembut.",
@@ -98,11 +172,10 @@ class UserModel extends BaseModel {
         rating: 4.7,
       ),
     );
-    // ... (sisa menu Anda tetap sama)
     addMenuItem(
       MenuModel(
         name: "Caffè Latte",
-        price: "Rp 22.000",
+        prices: {'Small': 'Rp 19.000', 'Medium': 'Rp 22.000', 'Large': 'Rp 25.000'},
         icon: "☕",
         imageUrl: "assets/latte.jpg",
         description: "Kopi dengan susu yang lembut.",
@@ -114,7 +187,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Mocha",
-        price: "Rp 25.000",
+        prices: {'Small': 'Rp 22.000', 'Medium': 'Rp 25.000', 'Large': 'Rp 28.000'},
         icon: "☕",
         imageUrl: "assets/mocca.jpg",
         description: "Kopi dengan campuran coklat.",
@@ -126,7 +199,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Caramel Macchiato",
-        price: "Rp 26.000",
+        prices: {'Small': 'Rp 23.000', 'Medium': 'Rp 26.000', 'Large': 'Rp 29.000'},
         icon: "☕",
         imageUrl: "assets/macchiato.jpg",
         description: "Kopi dengan rasa karamel yang lembut.",
@@ -138,7 +211,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Flat White",
-        price: "Rp 24.000",
+        prices: {'Small': 'Rp 21.000', 'Medium': 'Rp 24.000', 'Large': 'Rp 27.000'},
         icon: "☕",
         imageUrl: "assets/flat_white.jpg",
         description: "Kopi dengan susu yang lembut dan creamy.",
@@ -150,7 +223,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Iced Americano",
-        price: "Rp 20.000",
+        prices: {'Small': 'Rp 17.000', 'Medium': 'Rp 20.000', 'Large': 'Rp 23.000'},
         icon: "🧊",
         imageUrl: "assets/iced_americano.jpg",
         description: "Americano dingin yang menyegarkan.",
@@ -162,7 +235,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Iced Latte",
-        price: "Rp 24.000",
+        prices: {'Small': 'Rp 21.000', 'Medium': 'Rp 24.000', 'Large': 'Rp 27.000'},
         icon: "🧊",
         imageUrl: "assets/iced_latte.jpg",
         description: "Latte dingin yang menyegarkan.",
@@ -174,7 +247,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Iced Mocha",
-        price: "Rp 27.000",
+        prices: {'Small': 'Rp 24.000', 'Medium': 'Rp 27.000', 'Large': 'Rp 30.000'},
         icon: "🧊",
         imageUrl: "assets/iced_mocha.jpg",
         description: "Mocha dingin yang menyegarkan.",
@@ -186,7 +259,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Iced Caramel Macchiato",
-        price: "Rp 30.000",
+        prices: {'Small': 'Rp 27.000', 'Medium': 'Rp 30.000', 'Large': 'Rp 33.000'},
         icon: "🧊",
         imageUrl: "assets/iced_macchiato.jpg",
         description: "Caramel Macchiato dingin yang menyegarkan.",
@@ -198,7 +271,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Cold Brew",
-        price: "Rp 30.000",
+        prices: {'Small': 'Rp 27.000', 'Medium': 'Rp 30.000', 'Large': 'Rp 33.000'},
         icon: "🧊",
         imageUrl: "assets/cold_brew.jpg",
         description: "Kopi dingin dengan rasa yang kuat.",
@@ -210,7 +283,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Green Tea Latte",
-        price: "Rp 24.000",
+        prices: {'Small': 'Rp 21.000', 'Medium': 'Rp 24.000', 'Large': 'Rp 27.000'},
         icon: "🍵",
         imageUrl: "assets/greentea_latte.jpg",
         description: "Latte dengan rasa green tea.",
@@ -222,7 +295,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Matcha Frappé",
-        price: "Rp 26.000",
+        prices: {'Small': 'Rp 23.000', 'Medium': 'Rp 26.000', 'Large': 'Rp 29.000'},
         icon: "🍵",
         imageUrl: "assets/matcha_frappe.jpg",
         description: "Frappé dengan rasa matcha.",
@@ -234,7 +307,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Red Velvet Latte",
-        price: "Rp 25.000",
+        prices: {'Small': 'Rp 22.000', 'Medium': 'Rp 25.000', 'Large': 'Rp 28.000'},
         icon: "🍵",
         imageUrl: "assets/red_velvet.jpg",
         description: "Latte dengan rasa red velvet.",
@@ -246,7 +319,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Taro Latte",
-        price: "Rp 25.000",
+        prices: {'Small': 'Rp 22.000', 'Medium': 'Rp 25.000', 'Large': 'Rp 28.000'},
         icon: "🍵",
         imageUrl: "assets/taro_latte.jpg",
         description: "Latte dengan rasa taro.",
@@ -258,7 +331,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Hot Chocolate",
-        price: "Rp 22.000",
+        prices: {'Small': 'Rp 19.000', 'Medium': 'Rp 22.000', 'Large': 'Rp 25.000'},
         icon: "🍫",
         imageUrl: "assets/hot_chocolate.jpg",
         description: "Minuman coklat hangat yang lezat.",
@@ -270,7 +343,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Croissant Butter",
-        price: "Rp 18.000",
+        prices: {'Small': 'Rp 15.000', 'Medium': 'Rp 18.000', 'Large': 'Rp 21.000'},
         icon: "🥐",
         imageUrl: "assets/croissant_butter.jpg",
         description: "Pastry renyah dengan rasa butter.",
@@ -282,7 +355,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Chocolate Croissant",
-        price: "Rp 20.000",
+        prices: {'Small': 'Rp 17.000', 'Medium': 'Rp 20.000', 'Large': 'Rp 23.000'},
         icon: "🥐",
         imageUrl: "assets/chocolate_croissant.jpg",
         description: "Croissant dengan isian coklat.",
@@ -294,7 +367,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Cinnamon Roll",
-        price: "Rp 22.000",
+        prices: {'Small': 'Rp 19.000', 'Medium': 'Rp 22.000', 'Large': 'Rp 25.000'},
         icon: "🍩",
         imageUrl: "assets/cinnamon_roll.jpg",
         description: "Roti gulung dengan rasa kayu manis.",
@@ -306,7 +379,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Muffin (Blueberry/Chocolate)",
-        price: "Rp 18.000",
+        prices: {'Small': 'Rp 15.000', 'Medium': 'Rp 18.000', 'Large': 'Rp 21.000'},
         icon: "🧁",
         imageUrl: "assets/muffin.jpg",
         description: "Kue lembut dengan rasa blueberry atau coklat.",
@@ -318,7 +391,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Donut (Classic/Glazed)",
-        price: "Rp 12.000",
+        prices: {'Small': 'Rp 9.000', 'Medium': 'Rp 12.000', 'Large': 'Rp 15.000'},
         icon: "🍩",
         imageUrl: "assets/donut.jpg",
         description: "Donat klasik atau dengan glaze.",
@@ -330,7 +403,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "French Fries",
-        price: "Rp 18.000",
+        prices: {'Small': 'Rp 15.000', 'Medium': 'Rp 18.000', 'Large': 'Rp 21.000'},
         icon: "🍟",
         imageUrl: "assets/french_fries.jpg",
         description: "Kentang goreng renyah.",
@@ -342,7 +415,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Chicken Wings",
-        price: "Rp 28.000",
+        prices: {'Small': 'Rp 25.000', 'Medium': 'Rp 28.000', 'Large': 'Rp 31.000'},
         icon: "🍗",
         imageUrl: "assets/chicken_wings.jpg",
         description: "Sayap ayam goreng dengan bumbu spesial.",
@@ -354,7 +427,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Cheesecake",
-        price: "Rp 18.000",
+        prices: {'Small': 'Rp 15.000', 'Medium': 'Rp 18.000', 'Large': 'Rp 21.000'},
         icon: "🍰",
         imageUrl: "assets/cheesecake.jpg",
         description: "Kue keju yang lembut dan lezat.",
@@ -366,7 +439,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Chocolate Croissant",
-        price: "Rp 20.000",
+        prices: {'Small': 'Rp 17.000', 'Medium': 'Rp 20.000', 'Large': 'Rp 23.000'},
         icon: "🥐",
         imageUrl: "assets/chocolate_croissant.jpg",
         description: "Croissant dengan isian coklat.",
@@ -378,7 +451,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Tiramisu",
-        price: "Rp 20.000",
+        prices: {'Small': 'Rp 17.000', 'Medium': 'Rp 20.000', 'Large': 'Rp 23.000'},
         icon: "🍰",
         imageUrl: "assets/tiramisu.jpg",
         description: "Kue kopi dengan lapisan mascarpone.",
@@ -390,7 +463,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Brownies with Ice Cream",
-        price: "Rp 25.000",
+        prices: {'Small': 'Rp 22.000', 'Medium': 'Rp 25.000', 'Large': 'Rp 28.000'},
         icon: "🍫",
         imageUrl: "assets/brownies.jpg",
         description: "Brownies dengan tambahan es krim.",
@@ -402,7 +475,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Panna Cotta",
-        price: "Rp 26.000",
+        prices: {'Small': 'Rp 23.000', 'Medium': 'Rp 26.000', 'Large': 'Rp 29.000'},
         icon: "🍮",
         imageUrl: "assets/panna_cotta.jpg",
         description: "Dessert Italia yang lembut dan manis.",
@@ -414,7 +487,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Club Sandwich",
-        price: "Rp 32.000",
+        prices: {'Small': 'Rp 29.000', 'Medium': 'Rp 32.000', 'Large': 'Rp 35.000'},
         icon: "🥪",
         imageUrl: "assets/club_sandwich.jpg",
         description: "Sandwich dengan isian daging dan sayuran.",
@@ -426,7 +499,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Chicken Burger",
-        price: "Rp 35.000",
+        prices: {'Small': 'Rp 32.000', 'Medium': 'Rp 35.000', 'Large': 'Rp 38.000'},
         icon: "🍔",
         imageUrl: "assets/chicken_burger.jpg",
         description: "Burger dengan isian ayam goreng.",
@@ -438,7 +511,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Beef Burger",
-        price: "Rp 38.000",
+        prices: {'Small': 'Rp 35.000', 'Medium': 'Rp 38.000', 'Large': 'Rp 41.000'},
         icon: "🍔",
         imageUrl: "assets/beef_burger.jpg",
         description: "Burger dengan isian daging sapi.",
@@ -450,7 +523,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Pasta Aglio Olio",
-        price: "Rp 32.000",
+        prices: {'Small': 'Rp 29.000', 'Medium': 'Rp 32.000', 'Large': 'Rp 35.000'},
         icon: "🍝",
         imageUrl: "assets/pasta.jpg",
         description: "Pasta dengan toping udang yang lezat.",
@@ -462,7 +535,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Grilled Chicken",
-        price: "Rp 40.000",
+        prices: {'Small': 'Rp 37.000', 'Medium': 'Rp 40.000', 'Large': 'Rp 43.000'},
         icon: "🍗",
         imageUrl: "assets/grilled_chicken.jpg",
         description: "Ayam panggang dengan bumbu spesial.",
@@ -474,7 +547,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Lemon Tea (Hot/Iced)",
-        price: "Rp 18.000",
+        prices: {'Small': 'Rp 15.000', 'Medium': 'Rp 18.000', 'Large': 'Rp 21.000'},
         icon: "🍋",
         imageUrl: "assets/lemon_tea.jpg",
         description: "Teh dengan rasa lemon yang menyegarkan.",
@@ -486,7 +559,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Lychee Tea",
-        price: "Rp 20.000",
+        prices: {'Small': 'Rp 17.000', 'Medium': 'Rp 20.000', 'Large': 'Rp 23.000'},
         icon: "🍹",
         imageUrl: "assets/lychee_tea.jpg",
         description: "Teh dengan rasa leci yang manis.",
@@ -498,7 +571,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Peach Tea",
-        price: "Rp 20.000",
+        prices: {'Small': 'Rp 17.000', 'Medium': 'Rp 20.000', 'Large': 'Rp 23.000'},
         icon: "🍑",
         imageUrl: "assets/peach_tea.jpg",
         description: "Teh dengan rasa peach yang segar.",
@@ -510,7 +583,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Mineral Water",
-        price: "Rp 10.000",
+        prices: {'Small': 'Rp 7.000', 'Medium': 'Rp 10.000', 'Large': 'Rp 13.000'},
         icon: "💧",
         imageUrl: "assets/mineral.jpg",
         description: "Air mineral yang menyegarkan.",
@@ -522,7 +595,7 @@ class UserModel extends BaseModel {
     addMenuItem(
       MenuModel(
         name: "Sparkling Water",
-        price: "Rp 15.000",
+        prices: {'Small': 'Rp 12.000', 'Medium': 'Rp 15.000', 'Large': 'Rp 18.000'},
         icon: "✨",
         imageUrl: "assets/sparkling.jpg",
         description: "Air mineral dengan soda.",

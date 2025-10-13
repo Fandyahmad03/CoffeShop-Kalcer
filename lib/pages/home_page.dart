@@ -3,6 +3,8 @@ import 'dart:ui';
 import '../model/user_model.dart';
 import 'profile_page.dart';
 import 'detail_page.dart';
+import 'favourite_page.dart';
+import 'cart_page.dart';
 
 class HomePage extends StatefulWidget {
   final String email;
@@ -19,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   late final List<String> _categories;
   String _selectedCategory = "Coffee";
   int _bottomNavIndex = 0;
+  String _searchQuery = "";
 
   @override
   void initState() {
@@ -36,7 +39,11 @@ class _HomePageState extends State<HomePage> {
 
   List<MenuModel> _getFilteredMenu() {
     return user.menuItems
-        .where((item) => item.category == _selectedCategory)
+        .where((item) =>
+            (_searchQuery.isEmpty ? item.category == _selectedCategory : true) &&
+            (_searchQuery.isEmpty ||
+             item.name.toLowerCase().contains(_searchQuery) ||
+             item.category.toLowerCase().contains(_searchQuery)))
         .toList();
   }
 
@@ -45,7 +52,16 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       body: SafeArea(
-        child: ListView(
+        child: _buildPageContent(),
+      ),
+      bottomNavigationBar: _buildBottomNavBar(),
+    );
+  }
+
+  Widget _buildPageContent() {
+    switch (_bottomNavIndex) {
+      case 0:
+        return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           children: [
             const SizedBox(height: 20),
@@ -64,10 +80,14 @@ class _HomePageState extends State<HomePage> {
             _buildSpecialOfferCard(),
             const SizedBox(height: 24),
           ],
-        ),
-      ),
-      bottomNavigationBar: _buildBottomNavBar(),
-    );
+        );
+      case 1:
+        return FavouritePage(user: user);
+      case 2:
+        return CartPage(user: user);
+      default:
+        return const Center(child: Text("Page not found"));
+    }
   }
 
   Widget _buildHeader() {
@@ -124,8 +144,13 @@ class _HomePageState extends State<HomePage> {
       children: [
         Expanded(
           child: TextField(
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value.toLowerCase();
+              });
+            },
             decoration: InputDecoration(
-              hintText: "Find your coffee",
+              hintText: "Find your coffee and snacks",
               prefixIcon: const Icon(Icons.search, color: Colors.grey),
               filled: true,
               fillColor: Colors.white,

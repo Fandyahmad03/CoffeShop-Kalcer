@@ -102,7 +102,7 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                   ),
                   Text(
-                    widget.menuItem.price,
+                    widget.menuItem.prices[_selectedSize] ?? widget.menuItem.price,
                     style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -279,10 +279,12 @@ class _DetailPageState extends State<DetailPage> {
       height: 56,
       child: ElevatedButton(
         onPressed: () {
+          // Add to cart logic
+          widget.user.addToCart(widget.menuItem, _selectedSize, _quantity);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  "$_quantity x ${widget.menuItem.name} ($_selectedSize) ditambahkan"),
+                  "$_quantity x ${widget.menuItem.name} ($_selectedSize) ditambahkan ke keranjang"),
               backgroundColor: const Color(0xFF4E342E),
               duration: const Duration(seconds: 2),
             ),
@@ -324,8 +326,21 @@ class _DetailPageState extends State<DetailPage> {
             CircleAvatar(
               backgroundColor: Colors.black.withOpacity(0.3),
               child: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.favorite_border, color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    if (widget.user.isFavorite(widget.menuItem)) {
+                      widget.user.removeFromFavorites(widget.menuItem);
+                    } else {
+                      widget.user.addToFavorites(widget.menuItem);
+                    }
+                  });
+                },
+                icon: Icon(
+                  widget.user.isFavorite(widget.menuItem)
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
